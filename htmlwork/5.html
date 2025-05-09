@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+    <header>
+        <div id="h1" class="div">
+            <i class="fa-solid fa-bars fa-2x" ></i>
+
+            <a href="#">pay</a>
+
+            <i class="fa-solid fa-message fa-2x right"></i>
+            <i class="fa-solid fa-bell fa-2x"></i>
+            <i class="fa-solid fa-basket-shopping fa-2x"></i>
+
+        </div>
+        <div id="h2"><span>NAVER</span>
+            <input type="text" placeholder="검색어를 입력해주세요."></div>
+    </header>
+    <nav>
+        <ul>
+            <li class="icon-width-label">
+                <i class="fa-regular fa-envelope"></i><span>메일</span>
+            </li>
+            <li class="icon-width-label">
+                <i class="fa-solid fa-mug-hot"></i><span>카페</span>
+            </li>
+            <li class="icon-width-label">
+                <i class="fa-solid fa-blog"></i><span>블로그</span>
+            </li>
+            <li class="icon-width-label">
+                <i class="fa-solid fa-square-plus"></i><span>스토어</span>
+            </li>
+            <li class="icon-width-label">
+                <i class="fa-solid fa-newspaper"></i><span>뉴스</span>
+            </li>
+            <li class="icon-width-label">
+                <i class="fa-solid fa-arrow-right"></i><span>증권</span>
+            </li>
+            <li class="icon-width-label">
+                <i class="fa-solid fa-house"></i><span>부동산</span>
+            </li>
+            <li class="icon-width-label">
+                <i class="fa-solid fa-map"></i><span>지도</span>
+            </li>
+            <li class="icon-width-label">
+                <i class="fa-solid fa-book"></i><span>웹툰</span>
+            </li>
+            <li class="icon-width-label">
+                <i class="fa-solid fa-bolt-lightning"></i><span>치지직</span>
+            </li>
+            <li class="icon-width-label">
+                <span>...</span>
+            </li>
+        </ul>
+     
+    </nav>
+    
+    <style>
+         ul {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+            justify-content: center;
+             }
+       
+
+        #h2{
+            display: flex;
+             justify-content: center;
+             gap: 10px; 
+             color:greenyellow;
+             font-size: 30px;
+             
+        }
+        #h1 {
+            display: flex;
+            align: center;
+             gap: 15px;
+                padding: 0 20px;
+             }
+
+         .right {
+             margin-left: auto;
+             }
+
+             
+        a{
+            text-decoration: none;
+            border:3px solid black;
+            border-radius: 100%;
+            padding: 3px;
+            display: inline-block;
+            width:25px;
+            height:25px;
+            align: center;
+        }
+        a:visited{
+            color:black;
+        }
+        a:active{
+            color:black;
+        }
+
+        .icon-width-label{
+            display: flex;
+            flex-direction: column;
+            font-size: 14px;
+        }
+
+        .icon-width-label i {
+            font-size:24px;
+        }
+    </style>
+</body>
+</html>
