@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<!--  예상되는 우려사항 : 1) 팀프로젝트간에 페이지별로 style,javascript을 어떻게 개별적으로 작성할 것인가?  -> webpack-->
+                <!-- 2) 작성한 파일을 어떻게 한 곳에 모아서 서비스 할 것인가? -> github -->
+<body>
+   <h3>PHONE BOOK</h3>
+    <script>
+        // 1) data.json으로 부터 데이터를 수신한다.
+        let data=[
+        {"pic":"person.png","name":"kim","hp":"010-1111-1111"},
+        {"pic":"person.jpg","name":"lee","hp":"010-1111-2222"},
+         {"pic":"person.jpg","name":"hong","hp":"010-1111-3333"},
+        {"pic":"person.jpg","name":"park","hp":"010-1111-4444"},
+         {"pic":"person.jpg","name":"ryu","hp":"010-1111-5555"}
+        ]
+        // 2) 수신데이터를 반복문을 사용하여 아래코드를 body에 입력한다.
+        let body = document.querySelector("body"); //입력할 객체 얻기
+        data.forEach((obj) => {
+            // console.log(obj);
+            let fw=`<div class="person">
+                <img src="${obj.pic}" alt="${obj.pic}" width="100px">
+                <ul>
+                <li><span>${obj.name}</span></li>
+                 <li><span>${obj.hp}</span></li>
+                 </ul>
+                 <div>`;
+                 body.innerHTML+=fw;
+                 });
+       
+    </script>
+    <style>
+        /* 전체 div가 아닌 .person 클래스에만 스타일 적용 */
+        .person {
+            display: flex;
+             border-bottom: 1px solid black;
+            padding: 10px;
+            align-items: center;
+            }
+
+        img{
+            border:1px solid skyblue;
+            border-radius: 100%;
+        }
+        
+        span{
+            /* display:inline-block;
+            vertical-align: middle; */
+        }
+    </style>
+</body>
+</html>
