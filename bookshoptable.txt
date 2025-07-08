@@ -1,0 +1,231 @@
+-- ============================================================================
+-- Oracle 12c 미만 호환 DDL: 시퀀스 + 트리거 방식 자동 증가
+-- 스키마: bookshop
+-- ============================================================================
+
+-- ----------------------------------------------------------------------------
+-- 1) USERS
+-- ----------------------------------------------------------------------------
+-- 시퀀스 생성 (사용자 ID 자동 증가)
+CREATE SEQUENCE seq_users START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+-- 테이블 생성
+CREATE TABLE users (
+  user_id     NUMBER        NOT NULL,
+  username    VARCHAR2(50 CHAR) NOT NULL,
+  password    VARCHAR2(100 CHAR) NOT NULL,
+  email       VARCHAR2(100 CHAR) NOT NULL,
+  phone       VARCHAR2(20 CHAR),
+  role        VARCHAR2(10 CHAR)  DEFAULT 'CUSTOMER' NOT NULL,
+  created_at  DATE             DEFAULT SYSDATE NOT NULL,
+  updated_at  DATE             DEFAULT SYSDATE NOT NULL,
+  CONSTRAINT pk_users      PRIMARY KEY (user_id),
+  CONSTRAINT uk_users_un   UNIQUE (username),
+  CONSTRAINT uk_users_email UNIQUE (email),
+  CONSTRAINT chk_users_role CHECK (role IN ('CUSTOMER','ADMIN'))
+);
+
+-- 트리거: INSERT 시 사용자 ID 자동 설정, UPDATED_AT 자동 갱신
+CREATE OR REPLACE TRIGGER trg_users_bi
+  BEFORE INSERT ON users
+  FOR EACH ROW
+BEGIN
+  :NEW.user_id := seq_users.NEXTVAL;
+  :NEW.created_at := SYSDATE;
+  :NEW.updated_at := SYSDATE;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_users_bu
+  BEFORE UPDATE ON users
+  FOR EACH ROW
+BEGIN
+  :NEW.updated_at := SYSDATE;
+END;
+/
+
+-- ----------------------------------------------------------------------------
+-- 2) BOOKS
+-- ----------------------------------------------------------------------------
+CREATE SEQUENCE seq_books START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE TABLE books (
+  book_id       NUMBER               NOT NULL,
+  title         VARCHAR2(200 CHAR)   NOT NULL,
+  author        VARCHAR2(100 CHAR)   NOT NULL,
+  description   CLOB,
+  price         NUMBER(10,2)         NOT NULL,
+  stock         NUMBER(10)           DEFAULT 0 NOT NULL,
+  cover_image   BLOB,
+  created_at    DATE                 DEFAULT SYSDATE NOT NULL,
+  updated_at    DATE                 DEFAULT SYSDATE NOT NULL,
+  CONSTRAINT pk_books       PRIMARY KEY (book_id),
+  CONSTRAINT chk_books_price CHECK (price >= 0),
+  CONSTRAINT chk_books_stock CHECK (stock >= 0)
+);
+
+CREATE OR REPLACE TRIGGER trg_books_bi
+  BEFORE INSERT ON books
+  FOR EACH ROW
+BEGIN
+  :NEW.book_id := seq_books.NEXTVAL;
+  :NEW.created_at := SYSDATE;
+  :NEW.updated_at := SYSDATE;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_books_bu
+  BEFORE UPDATE ON books
+  FOR EACH ROW
+BEGIN
+  :NEW.updated_at := SYSDATE;
+END;
+/
+
+-- ----------------------------------------------------------------------------
+-- 3) CARTS
+-- ----------------------------------------------------------------------------
+CREATE SEQUENCE seq_carts START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE TABLE carts (
+  cart_id     NUMBER        NOT NULL,
+  user_id     NUMBER        NOT NULL,
+  created_at  DATE          DEFAULT SYSDATE NOT NULL,
+  updated_at  DATE          DEFAULT SYSDATE NOT NULL,
+  CONSTRAINT pk_carts      PRIMARY KEY (cart_id),
+  CONSTRAINT fk_carts_user FOREIGN KEY (user_id) REFERENCES users(user_id)
+);
+
+CREATE OR REPLACE TRIGGER trg_carts_bi
+  BEFORE INSERT ON carts
+  FOR EACH ROW
+BEGIN
+  :NEW.cart_id := seq_carts.NEXTVAL;
+  :NEW.created_at := SYSDATE;
+  :NEW.updated_at := SYSDATE;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_carts_bu
+  BEFORE UPDATE ON carts
+  FOR EACH ROW
+BEGIN
+  :NEW.updated_at := SYSDATE;
+END;
+/
+
+-- ----------------------------------------------------------------------------
+-- 4) CART_ITEMS
+-- ----------------------------------------------------------------------------
+CREATE SEQUENCE seq_cart_items START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE TABLE cart_items (
+  cart_item_id NUMBER        NOT NULL,
+  cart_id      NUMBER        NOT NULL,
+  book_id      NUMBER        NOT NULL,
+  quantity     NUMBER(8)     DEFAULT 1 NOT NULL,
+  added_at     DATE          DEFAULT SYSDATE NOT NULL,
+  updated_at   DATE          DEFAULT SYSDATE NOT NULL,
+  CONSTRAINT pk_cart_items         PRIMARY KEY (cart_item_id),
+  CONSTRAINT fk_cart_items_cart    FOREIGN KEY (cart_id) REFERENCES carts(cart_id),
+  CONSTRAINT fk_cart_items_book    FOREIGN KEY (book_id) REFERENCES books(book_id),
+  CONSTRAINT chk_cart_items_qty    CHECK (quantity >= 1)
+);
+
+CREATE OR REPLACE TRIGGER trg_cart_items_bi
+  BEFORE INSERT ON cart_items
+  FOR EACH ROW
+BEGIN
+  :NEW.cart_item_id := seq_cart_items.NEXTVAL;
+  :NEW.added_at := SYSDATE;
+  :NEW.updated_at := SYSDATE;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_cart_items_bu
+  BEFORE UPDATE ON cart_items
+  FOR EACH ROW
+BEGIN
+  :NEW.updated_at := SYSDATE;
+END;
+/
+
+-- ----------------------------------------------------------------------------
+-- 5) ORDERS
+-- ----------------------------------------------------------------------------
+CREATE SEQUENCE seq_orders START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE TABLE orders (
+  order_id     NUMBER         NOT NULL,
+  user_id      NUMBER         NOT NULL,
+  order_date   DATE           DEFAULT SYSDATE NOT NULL,
+  status       VARCHAR2(20 CHAR) DEFAULT 'PENDING' NOT NULL,
+  total_amount NUMBER(12,2)   NOT NULL,
+  created_at   DATE           DEFAULT SYSDATE NOT NULL,
+  updated_at   DATE           DEFAULT SYSDATE NOT NULL,
+  CONSTRAINT pk_orders           PRIMARY KEY (order_id),
+  CONSTRAINT fk_orders_user      FOREIGN KEY (user_id) REFERENCES users(user_id),
+  CONSTRAINT chk_orders_status   CHECK (status IN ('PENDING','PAID','SHIPPED','DELIVERED','CANCELLED')),
+  CONSTRAINT chk_orders_amount   CHECK (total_amount >= 0)
+);
+
+CREATE OR REPLACE TRIGGER trg_orders_bi
+  BEFORE INSERT ON orders
+  FOR EACH ROW
+BEGIN
+  :NEW.order_id := seq_orders.NEXTVAL;
+  :NEW.order_date := SYSDATE;
+  :NEW.created_at := SYSDATE;
+  :NEW.updated_at := SYSDATE;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_orders_bu
+  BEFORE UPDATE ON orders
+  FOR EACH ROW
+BEGIN
+  :NEW.updated_at := SYSDATE;
+END;
+/
+
+-- ----------------------------------------------------------------------------
+-- 6) ORDER_ITEMS
+-- ----------------------------------------------------------------------------
+CREATE SEQUENCE seq_order_items START WITH 1 INCREMENT BY 1 NOCACHE NOCYCLE;
+
+CREATE TABLE order_items (
+  order_item_id NUMBER       NOT NULL,
+  order_id      NUMBER       NOT NULL,
+  book_id       NUMBER       NOT NULL,
+  quantity      NUMBER(8)    DEFAULT 1 NOT NULL,
+  unit_price    NUMBER(12,2) NOT NULL,
+  created_at    DATE         DEFAULT SYSDATE NOT NULL,
+  updated_at    DATE         DEFAULT SYSDATE NOT NULL,
+  CONSTRAINT pk_order_items        PRIMARY KEY (order_item_id),
+  CONSTRAINT fk_order_items_order  FOREIGN KEY (order_id) REFERENCES orders(order_id),
+  CONSTRAINT fk_order_items_book   FOREIGN KEY (book_id) REFERENCES books(book_id),
+  CONSTRAINT chk_oitems_quantity   CHECK (quantity >= 1),
+  CONSTRAINT chk_oitems_unitprice  CHECK (unit_price >= 0)
+);
+
+CREATE OR REPLACE TRIGGER trg_order_items_bi
+  BEFORE INSERT ON order_items
+  FOR EACH ROW
+BEGIN
+  :NEW.order_item_id := seq_order_items.NEXTVAL;
+  :NEW.created_at := SYSDATE;
+  :NEW.updated_at := SYSDATE;
+END;
+/
+
+CREATE OR REPLACE TRIGGER trg_order_items_bu
+  BEFORE UPDATE ON order_items
+  FOR EACH ROW
+BEGIN
+  :NEW.updated_at := SYSDATE;
+END;
+/
+
+-- ============================================================================
+-- End of DDL (Pre-12c Identity Emulation)
+-- ============================================================================
